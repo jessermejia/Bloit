@@ -28,21 +28,23 @@ size5 = BitSize 5
 size6 = BitSize 6
 size7 = BitSize 7
 
--- These helper functions can take advanage of similar ones in Data.Bits.
+byteOfInt x =
+  x .&. 0xff
+
 fetchBit (BitNumber n) word =
   testBit word n
 
-clear_bit (BitNumber n) word =
-  clearBit word n
-
-set_bit (BitNumber n) word =
-  setBit word n
-
--- set_bit and clear_bit require BitNumber, so no need to re-specify it here.
-setBitTo n word value =
-  if value then set_bit n word
-  else clear_bit n word
-
 fetchBits (BitNumber high) (BitSize length) word =
   let mask = complement ((-1) `shiftL` length) in
-  (word `shiftR` (high - length + 1)) .&. mask
+    (word `shiftR` (high - length + 1)) .&. mask
+
+isInRange (ByteAddress address) size =
+    0 <= address && address < size
+
+isOutOfRange address size =
+    not (isInRange address size)
+
+setBitTo (BitNumber n) word value =
+  if value
+    then setBit n word
+    else clearBit n word
