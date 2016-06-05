@@ -1,15 +1,15 @@
 module Bloit where
 
 import Data.Bits
+import ImmutableBytes
+import Text.Printf
+import Type
 import Utility
 
-word = 0xBEEF :: Int
-
-fetchBitsOriginal high length word =
-  let mask = complement ((-1) `shiftL` length) in
-  (word `shiftR` (high - length + 1)) .&. mask
-
-main = do
-  print (shiftR word 12 .&. complement (shiftL (-1) 4))
-  print (fetchBitsOriginal 15 4 word)
-  print (fetchBits bit15 size4 word)
+main :: IO()
+main = let addr1 = ByteAddress 1 in
+        let bytes_a = ImmutableBytes.make "Hello world" in
+          let bytes_b = ImmutableBytes.writeByte bytes_a addr1 65 in
+            let b_a = ImmutableBytes.readByte bytes_a addr1 in
+              let b_b = ImmutableBytes.readByte bytes_b addr1 in
+       printf "%d %d\n" b_a b_b
