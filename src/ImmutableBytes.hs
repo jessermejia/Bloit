@@ -27,6 +27,7 @@ readByte bytes address =
                   else originalBytes bytes !! addr in
         ord c
 
+writeByte :: T -> ByteAddress -> Int -> T
 writeByte bytes address value =
   if isOutOfRange address (size bytes)
     then error "address is out of range"
