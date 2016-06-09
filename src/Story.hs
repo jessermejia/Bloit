@@ -15,6 +15,10 @@ make dynamic static =
             , staticMemory = static
             }
 
+abbreviationsTableBase story =
+  let abbreviationsTableBaseOffset = WordAddress 24 in
+  AbbreviationTableBase (readWord story abbreviationsTableBaseOffset)
+
 headerSize = 64
 staticMemoryBaseOffset = WordAddress 14
 load filename = do
