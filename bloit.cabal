@@ -21,6 +21,7 @@ executable bloit
                       ,Story
                       ,Type
                       ,Utility
+                      ,Zstring
   build-depends:       base >= 4.7 && < 5
                       ,binary == 0.7.5.0
                       ,bytestring == 0.10.6.0

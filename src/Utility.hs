@@ -49,19 +49,25 @@ dereferenceString address bytes =
     else let (ByteAddress addr) = address in
       ord (bytes !! addr)
 
-fetchBit (BitNumber n) word =
-  testBit word n
+-- fetchBit (BitNumber n) word =
+--   testBit word n
 
 fetchBits (BitNumber high) (BitSize length) word =
   let mask = complement ((-1) `shiftL` length) in
     (word `shiftR` (high - length + 1)) .&. mask
 
-getFile fp = do
-    contents <- LBS.readFile fp
+getFile filePath = do
+    contents <- LBS.readFile filePath
     return $ bytesToString (unpack contents)
 
 incByteAddrBy (ByteAddress address) offset =
   ByteAddress (address + offset)
+
+incWordAddrBy (WordAddress address) offset =
+  WordAddress (address + offset * wordSize)
+
+incWordAddr address =
+  incWordAddrBy address 1
 
 isInRange (ByteAddress address) size =
     0 <= address && address < size
@@ -73,3 +79,5 @@ setBitTo (BitNumber n) word value =
   if value
     then setBit n word
     else clearBit n word
+
+wordSize = 2
