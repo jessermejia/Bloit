@@ -10,10 +10,12 @@ data T = T { originalBytes :: String
            , edits :: IntMap.IntMap Char
            }
 
+make :: String -> T
 make bytes = T { originalBytes = bytes
                , edits = IntMap.empty
                }
 
+size :: ImmutableBytes.T -> Int
 size bytes =
   length (originalBytes bytes)
 
@@ -35,4 +37,5 @@ writeByte bytes address value =
       let b = chr (byteOfInt value) in
        bytes { edits = IntMap.insert addr b (edits bytes) }
 
+original :: T -> T
 original bytes = bytes { edits = IntMap.empty }
