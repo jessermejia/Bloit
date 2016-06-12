@@ -22,6 +22,7 @@ executable bloit
   other-modules:       Bloit
                       ,Dictionary
                       ,ImmutableBytes
+                      ,Object
                       ,Story
                       ,Type
                       ,Utility
