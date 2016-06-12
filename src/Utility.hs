@@ -56,6 +56,20 @@ size5 = BitSize 5
 size6 = BitSize 6
 size7 = BitSize 7
 
+wordSize :: Int
+wordSize = 2
+
+accumulateStringsLoop :: (Int -> String) -> Int -> Int -> String
+accumulateStringsLoop toString start max =
+  aux "" start
+  where
+    aux :: String -> Int -> String
+    aux acc i =
+      if i >= max
+        then acc
+        else aux (acc ++ toString i) (i + 1)
+  
+
 addressOfHighByte :: WordAddress -> ByteAddress
 addressOfHighByte (WordAddress address) =
   ByteAddress address
@@ -97,6 +111,10 @@ incByteAddrBy :: ByteAddress -> Int -> ByteAddress
 incByteAddrBy (ByteAddress address) offset =
   ByteAddress (address + offset)
 
+incByteAddr :: ByteAddress -> ByteAddress
+incByteAddr address = 
+    incByteAddrBy address 1
+
 incWordAddrBy :: WordAddress -> Int -> WordAddress
 incWordAddrBy (WordAddress address) offset =
   WordAddress (address + offset * wordSize)
@@ -118,6 +136,3 @@ setBitTo (BitNumber n) word value =
   if value
     then setBit n word
     else clearBit n word
-
-wordSize :: Int
-wordSize = 2
