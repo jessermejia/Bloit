@@ -12,6 +12,9 @@ headerSize = 64
 staticMemoryBaseOffset :: WordAddress
 staticMemoryBaseOffset = WordAddress 14
 
+versionOffset :: ByteAddress
+versionOffset = ByteAddress 0
+
 data T = T { dynamicMemory :: ImmutableBytes.T
            , staticMemory :: String
            }
@@ -46,6 +49,11 @@ load filename = do
                 let static = drop dynamicLength file in
                   return (Story.make dynamic static)
 
+objectTableBase :: Story.T -> ObjectBase
+objectTableBase story =
+  let objectTableBaseOffset = WordAddress 10 in
+  ObjectBase (readWord story objectTableBaseOffset)
+
 readByte :: Story.T -> ByteAddress -> Int
 readByte story address =
   let dynamicSize = size (dynamicMemory story) in
@@ -72,3 +80,21 @@ writeWord story address value =
   let low = value .&. 0xFF in
   let localStory = Story.writeByte story (addressOfHighByte address) high in
     Story.writeByte localStory (addressOfLowByte address) low
+
+v3_OrLower :: Version -> Bool
+v3_OrLower v | v `elem` [V1, V2, V3] = True
+             | v `elem` [V4, V5, V6, V7, V8] = False
+             | otherwise = error "unknown version"
+
+version :: Story.T -> Version
+version story =
+  case Story.readByte story versionOffset of
+    1 -> V1
+    2 -> V2
+    3 -> V3
+    4 -> V4
+    5 -> V5
+    6 -> V6
+    7 -> V7
+    8 -> V8
+    _ -> error "unknown version"

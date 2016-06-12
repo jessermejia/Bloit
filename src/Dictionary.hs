@@ -28,8 +28,8 @@ entry story dictionaryNumber =
 entryAddress :: Story.T -> DictionaryNumber -> DictionaryAddress
 entryAddress story (Dictionary dictionaryNumber) =
   let (DictionaryTableBase base) = tableBase story
-      length = entryLength story in
-  DictionaryAddress (base + dictionaryNumber * length)
+      len = entryLength story in
+  DictionaryAddress (base + dictionaryNumber * len)
 
 entryBase :: Story.T -> ByteAddress
 entryBase story =

@@ -60,12 +60,12 @@ wordSize :: Int
 wordSize = 2
 
 accumulateStringsLoop :: (Int -> String) -> Int -> Int -> String
-accumulateStringsLoop toString start max =
+accumulateStringsLoop toString start tooFar =
   aux "" start
   where
     aux :: String -> Int -> String
     aux acc i =
-      if i >= max
+      if i >= tooFar
         then acc
         else aux (acc ++ toString i) (i + 1)
   
