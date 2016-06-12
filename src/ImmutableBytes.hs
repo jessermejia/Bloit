@@ -14,11 +14,7 @@ make :: String -> T
 make bytes = T { originalBytes = bytes
                , edits = IntMap.empty
                }
-
-size :: ImmutableBytes.T -> Int
-size bytes =
-  length (originalBytes bytes)
-
+               
 readByte :: T -> ByteAddress -> Int
 readByte bytes address =
   if isOutOfRange address (size bytes)
@@ -28,6 +24,10 @@ readByte bytes address =
                   then fromJust (IntMap.lookup addr (edits bytes))
                   else originalBytes bytes !! addr in
         ord c
+
+size :: ImmutableBytes.T -> Int
+size bytes =
+  length (originalBytes bytes)
 
 writeByte :: T -> ByteAddress -> Int -> T
 writeByte bytes address value =

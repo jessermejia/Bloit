@@ -6,6 +6,12 @@ import Text.Printf
 import Type
 import Utility
 
+headerSize :: Int
+headerSize = 64
+
+staticMemoryBaseOffset :: WordAddress
+staticMemoryBaseOffset = WordAddress 14
+
 data T = T { dynamicMemory :: ImmutableBytes.T
            , staticMemory :: String
            }
@@ -20,11 +26,10 @@ abbreviationsTableBase story =
   let abbreviationsTableBaseOffset = WordAddress 24 in
   AbbreviationTableBase (readWord story abbreviationsTableBaseOffset)
 
-headerSize :: Int
-headerSize = 64
-
-staticMemoryBaseOffset :: WordAddress
-staticMemoryBaseOffset = WordAddress 14
+dictionaryBase :: Story.T -> DictionaryBase
+dictionaryBase story =
+  let dictionaryBaseOffset = WordAddress 8 in
+  DictionaryBase (readWord story dictionaryBaseOffset)
 
 load :: FilePath -> IO Story.T
 load filename = do
@@ -32,9 +37,9 @@ load filename = do
   let len = length file in
     if len < headerSize
       then error (printf "%s is not a valid story file" filename)
-      else let high = dereferenceString (addressOfHighByte staticMemoryBaseOffset) file in
-          let low = dereferenceString (addressOfLowByte staticMemoryBaseOffset) file in
-          let dynamicLength = high * 256 + low in
+      else let high = dereferenceString (addressOfHighByte staticMemoryBaseOffset) file
+               low = dereferenceString (addressOfLowByte staticMemoryBaseOffset) file
+               dynamicLength = high * 256 + low in
             if dynamicLength > len
               then error (printf "%s is not a valid story file" filename)
               else let dynamic = take dynamicLength file in
@@ -65,11 +70,5 @@ writeWord :: Story.T -> WordAddress -> Int -> Story.T
 writeWord story address value =
   let high = shiftR value 8 .&. 0xFF in
   let low = value .&. 0xFF in
-  let story = Story.writeByte story (addressOfHighByte address) high in
-    Story.writeByte story (addressOfLowByte address) low
-
--- let write_word story address value =
---   let high = (value lsr 8) land 0xFF in
---   let low = value land 0xFF in
---   let story = write_byte story (address_of_high_byte address) high in
---   write_byte story (address_of_low_byte address) low
+  let localStory = Story.writeByte story (addressOfHighByte address) high in
+    Story.writeByte localStory (addressOfLowByte address) low

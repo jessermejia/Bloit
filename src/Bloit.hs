@@ -1,5 +1,6 @@
 module Bloit where
 
+import Dictionary
 import Text.Printf
 import Story
 import Type
@@ -7,16 +8,6 @@ import Zstring
 
 main :: IO ()
 main = do
-  story <- Story.load "src/minizork.z3"
-  let zstring = Zstring 0xb106 in
-    let text = Zstring.read story zstring in
-    printf "%s\n" text;
-
-  -- story <- Story.load "src/minizork.z3"
-  -- let zstring = Zstring.abbreviationZstring story (Abbreviation 0) in
-  --   let text = Zstring.displayBytes story zstring in
-  --   printf "%s\n" text
-  -- let zstring = Zstring.abbreviationZstring story (Abbreviation 4) in
-  --   let text = Zstring.displayBytes story zstring in
-  --   printf "%s\n" text
-
+  story <- Story.load "minizork.z3"
+  let dict = Dictionary.display story in
+    printf "%s\n" dict
