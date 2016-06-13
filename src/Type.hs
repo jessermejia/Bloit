@@ -14,10 +14,10 @@ newtype DictionaryTableBase = DictionaryTableBase Int deriving (Show)
 newtype DictionaryAddress = DictionaryAddress Int deriving (Show)
 newtype DictionaryNumber = Dictionary Int deriving (Show)
 
-newtype ObjectBase = ObjectBase Int
-newtype ObjectTreeBase = ObjectTreeBase Int
-newtype ObjectNumber = Object Int
-newtype ObjectAddress = ObjectAddress Int
+newtype ObjectBase = ObjectBase Int deriving (Show)
+newtype ObjectTreeBase = ObjectTreeBase Int deriving (Show)
+newtype ObjectNumber = Object Int deriving (Show,Eq)
+newtype ObjectAddress = ObjectAddress Int deriving (Show)
 
 newtype PropertyDefaultsTable = PropertyDefaultsTable Int
 newtype PropertyHeaderAddress = PropertyHeader Int

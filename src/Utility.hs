@@ -59,6 +59,12 @@ size7 = BitSize 7
 wordSize :: Int
 wordSize = 2
 
+accumulateStrings :: Foldable t1 => (t -> String) -> t1 t -> String
+accumulateStrings toString items =
+  Prelude.foldl folder "" items
+    where
+      folder text item = text ++ toString item
+
 accumulateStringsLoop :: (Int -> String) -> Int -> Int -> String
 accumulateStringsLoop toString start tooFar =
   aux "" start
