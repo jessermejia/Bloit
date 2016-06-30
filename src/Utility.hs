@@ -84,6 +84,10 @@ addressOfLowByte :: WordAddress -> ByteAddress
 addressOfLowByte (WordAddress address) =
   ByteAddress (address + 1)
 
+byteAddrToWordAddr :: ByteAddress -> WordAddress
+byteAddrToWordAddr (ByteAddress address) =
+  WordAddress address
+
 byteOfInt :: (Num a, Bits a) => a -> a
 byteOfInt x =
   x .&. 0xff

@@ -86,6 +86,19 @@ v3_OrLower v | v `elem` [V1, V2, V3] = True
              | v `elem` [V4, V5, V6, V7, V8] = False
              | otherwise = error "unknown version"
 
+v4_OrLower :: Version -> Bool
+v4_OrLower v | v `elem` [V1, V2, V3, V4] = True
+             | v `elem` [V5, V6, V7, V8] = False
+             | otherwise = error "unknown version"
+
+v4_OrHigher :: Version -> Bool
+v4_OrHigher v = not (v3_OrLower v)
+
+v5_OrHigher :: Version -> Bool
+v5_OrHigher v | v `elem` [V5, V6, V7, V8] = True
+              | v `elem` [V1, V2, V3, V4] = False
+              | otherwise = error "unknown version"
+
 version :: Story.T -> Version
 version story =
   case Story.readByte story versionOffset of
