@@ -79,6 +79,7 @@ displayBytes story (Zstring addr) =
                             else aux (incWordAddr current) outAcc
 
 {- gives the length in bytes of the encoded zstring, not the decoded string -}
+length :: Story.T -> ZstringAddress -> Int
 length story (Zstring address) =
   aux 0 (WordAddress address)
   where

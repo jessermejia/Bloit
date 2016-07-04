@@ -1,5 +1,6 @@
 module Instruction where
 
+import Data.Maybe
 import Story
 import Text.Printf
 import Type
@@ -25,14 +26,14 @@ data OperandCount = OP0
                   | OP2
                   | VAR
 
+decodeVariable :: Int -> VariableLocation
 decodeVariable n | n == 0 = Stack
                  | n <= maximumLocal = LocalVariable (Local n)
                  | otherwise = GlobalVariable (Global n)
                  where
                   maximumLocal = 15
 
-
-
+encodeVariable :: VariableLocation -> Int
 encodeVariable variable =
   case variable of
     Stack -> 0
@@ -40,6 +41,7 @@ encodeVariable variable =
     GlobalVariable (Global n) -> n
 
 {- We match Inform's convention of numbering the locals and globals from zero -}
+displayVariable :: VariableLocation -> String
 displayVariable variable =
   case variable of
     Stack -> "sp"
@@ -54,59 +56,66 @@ data OperandType = LargeOperand
 {- The tables which follow are maps from the opcode identification number
    to the opcode type; the exact order matters. -}
 
+oneOperandBytecodes :: [Bytecode]
 oneOperandBytecodes = [
   OP1_128, OP1_129, OP1_130, OP1_131, OP1_132, OP1_133, OP1_134, OP1_135,
   OP1_136, OP1_137, OP1_138, OP1_139, OP1_140, OP1_141, OP1_142, OP1_143 ]
 
+zeroOperandBytecodes :: [Bytecode]
 zeroOperandBytecodes = [
   OP0_176, OP0_177, OP0_178, OP0_179, OP0_180, OP0_181, OP0_182, OP0_183,
   OP0_184, OP0_185, OP0_186, OP0_187, OP0_188, OP0_189, OP0_190, OP0_191 ]
 
+twoOperandBytecodes :: [Bytecode]
 twoOperandBytecodes = [
   ILLEGAL, OP2_1,  OP2_2,  OP2_3,  OP2_4,  OP2_5,   OP2_6,   OP2_7,
   OP2_8,   OP2_9,  OP2_10, OP2_11, OP2_12, OP2_13,  OP2_14,  OP2_15,
   OP2_16,  OP2_17, OP2_18, OP2_19, OP2_20, OP2_21,  OP2_22,  OP2_23,
   OP2_24,  OP2_25, OP2_26, OP2_27, OP2_28, ILLEGAL, ILLEGAL, ILLEGAL ]
 
+varOperandBytecodes :: [Bytecode]
 varOperandBytecodes = [
   VAR_224, VAR_225, VAR_226, VAR_227, VAR_228, VAR_229, VAR_230, VAR_231,
   VAR_232, VAR_233, VAR_234, VAR_235, VAR_236, VAR_237, VAR_238, VAR_239,
   VAR_240, VAR_241, VAR_242, VAR_243, VAR_244, VAR_245, VAR_246, VAR_247,
   VAR_248, VAR_249, VAR_250, VAR_251, VAR_252, VAR_253, VAR_254, VAR_255 ]
 
+extBytecodes :: [Bytecode]
 extBytecodes = [
   EXT_0,   EXT_1,   EXT_2,   EXT_3,   EXT_4,   EXT_5,   EXT_6,   EXT_7,
   EXT_8,   EXT_9,   EXT_10,  EXT_11,  EXT_12,  EXT_13,  EXT_14,  ILLEGAL,
   EXT_16,  EXT_17,  EXT_18,  EXT_19,  EXT_20,  EXT_21,  EXT_22,  EXT_23,
   EXT_24,  EXT_25,  EXT_26,  EXT_27,  EXT_28,  EXT_29,  ILLEGAL, ILLEGAL ]
 
---TODO: if blog9 doesn't work, check this and helper functions, else delete this comment
-hasStore opcode ver =
-  case opcode of
+hasStore :: Bytecode -> Version -> Bool
+hasStore opcode' ver =
+  case opcode' of
     OP1_143 -> Story.v4_OrLower ver  {- call_1n in v5, logical not in v1-4 -}
     OP0_181 -> Story.v4_OrHigher ver {- save branches in v3, stores in v4 -}
     OP0_182 -> Story.v4_OrHigher ver {- restore branches in v3, stores in v4 -}
     OP0_185 -> Story.v4_OrHigher ver {- pop in v4, catch in v5 -}
     VAR_233 -> ver == V6
     VAR_228 -> Story.v5_OrHigher ver
-    _ -> opcode `elem` [OP2_8   , OP2_9   , OP2_15  , OP2_16  , OP2_17  , OP2_18  , OP2_19
+    _ -> opcode' `elem` [OP2_8   , OP2_9   , OP2_15  , OP2_16  , OP2_17  , OP2_18  , OP2_19
                       , OP2_20  , OP2_21  , OP2_22  , OP2_23  , OP2_24  , OP2_25
                       , OP1_129 , OP1_130 , OP1_131 , OP1_132 , OP1_136 , OP1_142
                       , VAR_224 , VAR_231 , VAR_236 , VAR_246 , VAR_247 , VAR_248
                       , EXT_0   , EXT_1   , EXT_2   , EXT_3   , EXT_4   , EXT_9
                       , EXT_10  , EXT_19  , EXT_29]
 
-hasText opcode =
-  case opcode of
+hasText :: Bytecode -> Bool
+hasText opcode' =
+  case opcode' of
     OP0_178 -> True
     OP0_179 -> True
     _ -> False
 
-hasBranch opcode ver =
-  case opcode of
+hasBranch :: Bytecode -> Version -> Bool
+hasBranch opcode' ver =
+  case opcode' of
     OP0_181 -> Story.v3_OrLower ver {- save branches in v3, stores in v4 -}
     OP0_182 -> Story.v3_OrLower ver {- restore branches in v3, stores in v4 -}
-    _ -> opcode `elem` [OP2_1   , OP2_2   , OP2_3   , OP2_4   , OP2_5   , OP2_6   , OP2_7   , OP2_10
+    _ -> opcode' `elem` [OP2_1   , OP2_2   , OP2_3   , OP2_4   , OP2_5   , OP2_6   , OP2_7   , OP2_10
                       , OP1_128 , OP1_129 , OP1_130 , OP0_189 , OP0_191
                       , VAR_247 , VAR_255
                       , EXT_6   , EXT_14 , EXT_24  , EXT_27]
@@ -237,73 +246,72 @@ opcodeName EXT_29  _ = "buffer_screen"
 
 display :: Instruction.T -> Version -> String
 display instr ver =
-  let startAddr = (address instr) :: InstructionAddress in
+  let startAddr = address instr :: InstructionAddress in
   let name = opcodeName (opcode instr) ver in
-  let operands = displayOperands() in
-  let store = displayStore() in
-  let branch = displayBranch() in
-  let text = displayText() in
-    printf "%04x: %s %s%s %s %s\n" startAddr name operands store branch text
+  let operands' = displayOperands() in
+  let store' = displayStore() in
+  let branch' = displayBranch() in
+  let text' = displayText() in
+    printf "%04x: %s %s%s %s %s\n" startAddr name operands' store' branch' text'
       where
         displayOperands () = accumulateStrings toString (operands instr)
 
         toString :: Operand -> String
         toString operand =
           case operand of
-            (Large large) -> (printf "%04x " large)
-            (Small small) -> (printf "%02x " small)
-            (Variable variable) -> ((displayVariable variable) ++ " ")
+            (Large large) -> printf "%04x " large
+            (Small small) -> printf "%02x " small
+            (Variable variable) -> displayVariable variable ++ " "
         
         displayStore () =
           case store instr of Nothing -> ""
-                              Just variable -> "->" ++ (displayVariable variable)
+                              Just variable -> "->" ++ displayVariable variable
         displayBranch () =
           case branch instr of Nothing -> ""
                                Just (True, ReturnFalse) -> "?false"
                                Just (False, ReturnFalse) -> "?~false"
                                Just (True, ReturnTrue) -> "?true"
                                Just (False, ReturnTrue) -> "?~true"
-                               Just (True, BranchAddress (Instruction address)) -> printf "?%04x" address
-                               Just (False, BranchAddress (Instruction address)) -> printf "?~%04x" address
+                               Just (True, BranchAddress (Instruction address')) -> printf "?%04x" address'
+                               Just (False, BranchAddress (Instruction address')) -> printf "?~%04x" address'
         displayText () =
-          case text instr of Nothing -> ""
-                             Just str -> str
+          fromMaybe "" (text instr)
 {- End of display_instruction -}
 
 
 
 {- Takes the address of an instruction and produces the instruction -}
 decode :: Story.T -> InstructionAddress -> Instruction.T
-decode story (Instruction address) =
+decode story (Instruction address') =
   let form = decodeForm addr in
   let opCount = decodeOpCount addr form in
-  let opcode = decodeOpcode addr form opCount in
+  let opcode' = decodeOpcode addr form opCount in
   let opcodeLength = getOpcodeLength form in
-  let operandTypes = decodeOperandTypes addr form opCount opcode in
-  let typeLength = getTypeLength form opcode in
+  let operandTypes = decodeOperandTypes addr form opCount opcode' in
+  let typeLength = getTypeLength form opcode' in
   let operandAddress = incByteAddrBy addr (opcodeLength + typeLength) in
-  let operands = decodeOperands operandAddress operandTypes in
+  let operands' = decodeOperands operandAddress operandTypes in
   let operandLength = getOperandLength operandTypes in
   let storeAddress = incByteAddrBy operandAddress operandLength in
-  let store = decodeStore storeAddress opcode ver in
-  let storeLength = getStoreLength opcode ver in
+  let store' = decodeStore storeAddress opcode' ver in
+  let storeLength = getStoreLength opcode' ver in
   let branchCodeAddress = incByteAddrBy storeAddress storeLength in
-  let branch = decodeBranch branchCodeAddress opcode ver in
-  let branchLength = getBranchLength branchCodeAddress opcode ver in
+  let branch' = decodeBranch branchCodeAddress opcode' ver in
+  let branchLength = getBranchLength branchCodeAddress opcode' ver in
   let (ByteAddress ba) = branchCodeAddress in
   let textAddress = Zstring (ba + branchLength) in
-  let text = decodeText textAddress opcode in
-  let textLength = getTextLength textAddress opcode in
+  let text' = decodeText textAddress opcode' in
+  let textLength = getTextLength textAddress opcode' in
   let len =
         opcodeLength + typeLength + operandLength + storeLength +
         branchLength + textLength in
-  let address' = Instruction address in
-          Instruction.T { opcode = opcode, address = address', Instruction.length = len, operands = operands, store = store, branch = branch, text = text }
+  let address'' = Instruction address' in
+          Instruction.T { opcode = opcode', address = address'', Instruction.length = len, operands = operands', store = store', branch = branch', text = text' }
       where
-        addr = ByteAddress address
-        ver = (Story.version story)
-        readWord = Story.readWord story
-        readByte = Story.readByte story
+        addr = ByteAddress address'
+        ver = Story.version story
+        readWord' = Story.readWord story
+        readByte' = Story.readByte story
         readZstring = Zstring.read story
         zstringLength = Zstring.length story
 
@@ -315,8 +323,8 @@ decode story (Instruction address) =
         and the version is 5 or later, the form is "extended". Otherwise,
         the form is "long". -}
 
-        decodeForm address =
-          let b = readByte address in
+        decodeForm address'' =
+          let b = readByte' address'' in
           case fetchBits bit7 size2 b of 3 -> VariableForm
                                          2 -> if b == 190 then ExtendedForm else ShortForm
                                          _ -> LongForm
@@ -330,8 +338,8 @@ decode story (Instruction address) =
           then the count is VAR.
         * In extended form, the operand count is VAR. -}
 
-        decodeOpCount address form =
-          let b = readByte address in
+        decodeOpCount address'' form =
+          let b = readByte' address'' in
           case form of ShortForm -> if fetchBits bit5 size2 b == 3 then OP0 else OP1
                        LongForm -> OP2
                        VariableForm -> if fetchBit bit5 b then VAR else OP2
@@ -361,16 +369,16 @@ decode story (Instruction address) =
            the lower 5 bits
         -}
 
-        decodeOpcode address form opCount =
-          let b = readByte address in
+        decodeOpcode address'' form opCount =
+          let b = readByte' address'' in
           case (form, opCount) of (ExtendedForm, _) ->
                                     let maximumExtended = 29 in
-                                    let ext = readByte (incByteAddr address) in
+                                    let ext = readByte' (incByteAddr address'') in
                                     if ext > maximumExtended then ILLEGAL else extBytecodes !! ext
-                                  (_, OP0) -> zeroOperandBytecodes !! (fetchBits bit3 size4 b)
-                                  (_, OP1) -> oneOperandBytecodes !! (fetchBits bit3 size4 b)
-                                  (_, OP2) -> twoOperandBytecodes !! (fetchBits bit4 size5 b)
-                                  (_, VAR) -> varOperandBytecodes !! (fetchBits bit4 size5 b)
+                                  (_, OP0) -> zeroOperandBytecodes !! fetchBits bit3 size4 b
+                                  (_, OP1) -> oneOperandBytecodes !! fetchBits bit3 size4 b
+                                  (_, OP2) -> twoOperandBytecodes !! fetchBits bit4 size5 b
+                                  (_, VAR) -> varOperandBytecodes !! fetchBits bit4 size5 b
 
         getOpcodeLength form =
           case form of ExtendedForm -> 2
@@ -426,14 +434,14 @@ decode story (Instruction address) =
                 case decodeTypes typeBits of Omitted -> aux (i + 1) acc
                                              x -> aux (i + 1) (x : acc)
 
-        decodeOperandTypes address form opCount opcode =
-          case (form, opCount, opcode) of
+        decodeOperandTypes address'' form opCount opcode' =
+          case (form, opCount, opcode') of
             (_, OP0, _) -> []
             (_, OP1, _) ->
-              let b = readByte address in
+              let b = readByte' address'' in
                 [decodeTypes (fetchBits bit5 size2 b)]
             (LongForm, _, _) ->
-              let b = readByte address in
+              let b = readByte' address'' in
                 (case fetchBits bit6 size2 b of
                   0 -> [ SmallOperand, SmallOperand ]
                   1 -> [ SmallOperand, VariableOperand ]
@@ -443,20 +451,21 @@ decode story (Instruction address) =
             (VariableForm, _, VAR_250) -> concatDecodedVariables()
             _ ->
               let opcodeLength = getOpcodeLength form in
-              let typeByte = readByte (incByteAddrBy address opcodeLength) in
+              let typeByte = readByte' (incByteAddrBy address'' opcodeLength) in
                 decodeVariableTypes typeByte
             where
               concatDecodedVariables () =
                       let opcodeLength = getOpcodeLength form in
-                      let typeByte0 = readByte (incByteAddrBy address opcodeLength) in
-                      let typeByte1 = readByte (incByteAddrBy address (opcodeLength + 1)) in
-                        (decodeVariableTypes typeByte0) ++ (decodeVariableTypes typeByte1)
+                      let typeByte0 = readByte' (incByteAddrBy address'' opcodeLength) in
+                      let typeByte1 = readByte' (incByteAddrBy address'' (opcodeLength + 1)) in
+                        decodeVariableTypes typeByte0 ++ decodeVariableTypes typeByte1
 
-        getTypeLength form opcode =
-          case (form, opcode) of (VariableForm, VAR_236) -> 2 -- can we fall through?
-                                 (VariableForm, VAR_250) -> 2
-                                 (VariableForm, _) -> 1
-                                 _ -> 0
+        getTypeLength form opcode' =
+          case (form, opcode') of
+            (VariableForm, VAR_236) -> 2 -- can we fall through?
+            (VariableForm, VAR_250) -> 2
+            (VariableForm, _) -> 1
+            _ -> 0
 
         {- The operand types are large, small or variable, being 2, 1 and 1 bytes
            respectively. We take the list of operand types and produce a list of
@@ -468,25 +477,25 @@ decode story (Instruction address) =
           case operandTypes of
             [] -> []
             (LargeOperand : remainingTypes) ->
-              let w = readWord (byteAddrToWordAddr operandAddress) in
+              let w = readWord' (byteAddrToWordAddr operandAddress) in
               let tail' = decodeOperands (incByteAddrBy operandAddress wordSize) remainingTypes in
-                (Large w) : tail'
+                Large w : tail'
             (SmallOperand : remainingTypes) ->
-              let b = readByte operandAddress in
+              let b = readByte' operandAddress in
               let tail' = decodeOperands (incByteAddr operandAddress) remainingTypes in
-                (Small b) : tail'
+                Small b : tail'
             (VariableOperand : remainingTypes) ->
-              let b = readByte operandAddress in
+              let b = readByte' operandAddress in
               let v = decodeVariable b in
               let tail' = decodeOperands (incByteAddr operandAddress) remainingTypes in
-                (Variable v) : tail'
+                Variable v : tail'
             Omitted : _ -> error "omitted operand type passed to decode operands"
 
         getOperandLength operandTypes =
           case operandTypes of
             [] -> 0
-            (LargeOperand : remainingTypes) -> wordSize + (getOperandLength remainingTypes)
-            _ : remainingTypes -> 1 + (getOperandLength remainingTypes)
+            (LargeOperand : remainingTypes) -> wordSize + getOperandLength remainingTypes
+            _ : remainingTypes -> 1 + getOperandLength remainingTypes
             -- verify the above line (remaining types) is a correct translation
 
         {- Spec 4.6:
@@ -500,15 +509,15 @@ decode story (Instruction address) =
           I cannot get behind this. The store, branch and text are all part of
           an instruction. -}
 
-        decodeStore storeAddress opcode ver =
-          if hasStore opcode ver then
-            let storeByte = readByte storeAddress in
+        decodeStore storeAddress opcode' ver' =
+          if hasStore opcode' ver' then
+            let storeByte = readByte' storeAddress in
             Just (decodeVariable storeByte)
           else
             Nothing
 
-        getStoreLength opcode ver =
-          if hasStore opcode ver then 1 else 0
+        getStoreLength opcode' ver' =
+          if hasStore opcode' ver' then 1 else 0
 
         {- Spec 4.7
         * Instructions which test a condition are called "branch" instructions.
@@ -525,19 +534,19 @@ decode story (Instruction address) =
         * Otherwise, a branch moves execution to the instruction at address
           (Address after branch data) + Offset - 2. -}
 
-        decodeBranch branchCodeAddress opcode ver  =
-          if hasBranch opcode ver then
-            let high = readByte branchCodeAddress in
+        decodeBranch branchCodeAddress opcode' ver'  =
+          if hasBranch opcode' ver' then
+            let high = readByte' branchCodeAddress in
             let sense = fetchBit bit7 high in
             let bottom6 = fetchBits bit5 size6 high in
             let offset =
                   if fetchBit bit6 high then
                     bottom6
                   else
-                    let low = readByte (incByteAddr branchCodeAddress) in
+                    let low = readByte' (incByteAddr branchCodeAddress) in
                     let unsigned = 256 * bottom6 + low in
                     if unsigned < 8192 then unsigned else unsigned - 16384 in
-            let branch =
+            let branch' =
                   case offset of
                     0 -> (sense, ReturnFalse)
                     1 -> (sense, ReturnTrue)
@@ -546,27 +555,27 @@ decode story (Instruction address) =
                       let (ByteAddress addressAfter) = incByteAddrBy branchCodeAddress branchLength in
                       let branchTarget = Instruction (addressAfter + offset - 2) in
                       (sense, BranchAddress branchTarget) in
-            Just branch
+            Just branch'
           else
             Nothing
 
-        getBranchLength branchCodeAddress opcode ver =
-          if hasBranch opcode ver then
-            let b = readByte branchCodeAddress in
+        getBranchLength branchCodeAddress opcode' ver' =
+          if hasBranch opcode' ver' then
+            let b = readByte' branchCodeAddress in
             if fetchBit bit6 b then 1 else 2
           else 0
 
         {- Spec:
           Two opcodes, print and print_ret, are followed by a text string. -}
 
-        decodeText textAddress opcode =
-          if hasText opcode then
+        decodeText textAddress opcode' =
+          if hasText opcode' then
             Just (readZstring textAddress)
           else
             Nothing
 
-        getTextLength textAddress opcode =
-          if hasText opcode then
+        getTextLength textAddress opcode' =
+          if hasText opcode' then
             zstringLength textAddress
           else
             0
