@@ -1,10 +1,10 @@
 module Object where
 
-import Story
-import Text.Printf
-import Type
-import Utility
-import Zstring
+import           Story
+import           Text.Printf
+import           Type
+import           Utility
+import           Zstring
 
 {- The object table is laid out as follows:
 
@@ -66,7 +66,7 @@ displayObjectTree story =
     where
       toString :: ObjectNumber -> String
       toString obj = aux "" "" obj
-      
+
       aux :: String -> String -> ObjectNumber -> String
       aux acc indent obj =
         if obj == invalidObject then

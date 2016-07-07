@@ -1,10 +1,10 @@
 module Utility where
 
-import Data.Bits
-import Data.ByteString.Lazy as LBS
-import Data.Char
-import Language.Haskell.TH.Ppr
-import Type
+import           Data.Bits
+import           Data.ByteString.Lazy    as LBS hiding (elem)
+import           Data.Char
+import           Language.Haskell.TH.Ppr
+import           Type
 
 bit0 :: BitNumber
 bit1 :: BitNumber
@@ -74,7 +74,7 @@ accumulateStringsLoop toString start tooFar =
       if i >= tooFar
         then acc
         else aux (acc ++ toString i) (i + 1)
-  
+
 
 addressOfHighByte :: WordAddress -> ByteAddress
 addressOfHighByte (WordAddress address) =
@@ -122,7 +122,7 @@ incByteAddrBy (ByteAddress address) offset =
   ByteAddress (address + offset)
 
 incByteAddr :: ByteAddress -> ByteAddress
-incByteAddr address = 
+incByteAddr address =
     incByteAddrBy address 1
 
 incWordAddrBy :: WordAddress -> Int -> WordAddress
@@ -146,3 +146,51 @@ setBitTo (BitNumber n) word value =
   if value
     then setBit n word
     else clearBit n word
+
+signedWord :: Int -> Int
+signedWord word =
+  let canonical = unsignedWord word in
+  if canonical > 32767 then canonical - 65536 else canonical
+
+unsignedWord :: Int -> Int
+unsignedWord word =
+  ((word `mod` 65536) + 65536) `mod` 65536
+
+{- Helper method that takes an item and a function that produces related items.
+ The result is the transitive closure of the relation. -}
+
+{- TODO: This is not very efficient because of the call to List.mem in there.
+   TODO: A solution involving an immutable set would be more performant for
+   TODO: large closures. -}
+
+
+transitiveClosureMany :: Eq a => [a] -> (a -> [a]) -> [a]
+transitiveClosureMany items relation =
+  aux [] items
+  where
+    merge related set stack =
+      case related of
+        []          -> (set, stack)
+        head' : tail' ->
+          if head' `elem` set
+            then merge tail' set stack
+            else merge tail' (head' : set) (head' : stack)
+    aux set stack =
+      case stack of
+        []          -> set
+        head' : tail' ->
+          let (newSet, newStack) = merge (relation head') set tail' in
+            aux newSet newStack
+
+transitiveClosure :: Eq a => a -> (a -> [a]) -> [a]
+transitiveClosure item relation =
+  transitiveClosureMany [item] relation
+
+reflexiveClosureMany :: Eq a => [a] -> (a -> [a]) -> [a]
+reflexiveClosureMany items relation =
+  let t = transitiveClosureMany items relation in
+  Prelude.foldl (\s i -> if i `elem` s then s else i : s) t items
+
+reflexiveClosure :: Eq a => a -> (a -> [a]) -> [a]
+reflexiveClosure item relation =
+  reflexiveClosureMany [item] relation

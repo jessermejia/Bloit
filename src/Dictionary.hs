@@ -1,10 +1,10 @@
 module Dictionary where
 
-import Utility
-import Story
-import Text.Printf
-import Type
-import Zstring
+import           Story
+import           Text.Printf
+import           Type
+import           Utility
+import           Zstring
 
 {- The table is laid out as follows. First there is a header:
 byte giving the number of word separators

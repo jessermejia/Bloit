@@ -1,10 +1,10 @@
-import Test.HUnit
-import UtilitySpec
+import           Test.HUnit
+import           UtilitySpec
 
 main =
   -- UtilitySpec.qcTests
   UtilitySpec.hunitTests
-        
+
 
 {- example testframework/quickcheck tests -}
 -- import Test.Framework (defaultMain, testGroup)

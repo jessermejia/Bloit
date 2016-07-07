@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Type where
 
-import Text.Printf
+import           Text.Printf
 
 newtype AbbreviationNumber = Abbreviation Int deriving (Show)
 newtype AbbrevTableBase = AbbreviationTableBase Int deriving (Show)
@@ -15,7 +15,7 @@ newtype DictionaryTableBase = DictionaryTableBase Int deriving (Show)
 newtype DictionaryAddress = DictionaryAddress Int deriving (Show)
 newtype DictionaryNumber = Dictionary Int deriving (Show)
 
-newtype InstructionAddress = Instruction Int deriving (Eq,Show,PrintfArg)
+newtype InstructionAddress = Instruction Int deriving (Eq,Ord,PrintfArg,Show)
 newtype LocalVariable = Local Int deriving (Show)
 newtype GlobalVariable = Global Int deriving (Show)
 

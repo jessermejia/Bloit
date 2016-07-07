@@ -1,20 +1,20 @@
 module ImmutableBytes where
 
+import           Data.Char
 import qualified Data.IntMap.Lazy as IntMap
-import Data.Char
-import Data.Maybe
-import Type
-import Utility
+import           Data.Maybe
+import           Type
+import           Utility
 
 data T = T { originalBytes :: String
-           , edits :: IntMap.IntMap Char
+           , edits         :: IntMap.IntMap Char
            }
 
 make :: String -> T
 make bytes = T { originalBytes = bytes
                , edits = IntMap.empty
                }
-               
+
 readByte :: T -> ByteAddress -> Int
 readByte bytes address =
   if isOutOfRange address (size bytes)

@@ -2,11 +2,12 @@ module Bloit where
 
 -- import Dictionary
 -- import ImmutableBytes
-import Instruction
+-- import Instruction
 -- import Object
-import Text.Printf
-import Story
-import Type
+import           Reachability
+import           Story
+import           Text.Printf
+import           Type
 -- import Utility
 -- import Zstring
 
@@ -21,7 +22,7 @@ main = do
   -- "I want 4 bits from this word, starting from bit 15 (going down),"
   -- the following pulls: 1011
   -- 1011 == B (or b) in hexadecimal
-  -- see the unit tests in UtilitySpec for better detail on how this works 
+  -- see the unit tests in UtilitySpec for better detail on how this works
     -- let word = 0xBEEF :: Int
     --     bitNumber = BitNumber 15
     --     bitSize = BitSize 4 in
@@ -59,11 +60,11 @@ main = do
   -- 1e y 14 o 1a u 17 r 00 _ 05 ?
   -- we can see that 'e' corresponds to 0a (or A) in Zstring.alphabetTable
     -- story <- Story.load "minizork.z3"
-    -- let zstring = Zstring.abbreviationZstring story (Abbreviation 0) in 
-    --     let text = Zstring.displayBytes story zstring in 
-    --     printf "%s\n" text 
-    -- let zstring = Zstring.abbreviationZstring story (Abbreviation 4) in 
-    --   let text' = Zstring.displayBytes story zstring in 
+    -- let zstring = Zstring.abbreviationZstring story (Abbreviation 0) in
+    --     let text = Zstring.displayBytes story zstring in
+    --     printf "%s\n" text
+    -- let zstring = Zstring.abbreviationZstring story (Abbreviation 4) in
+    --   let text' = Zstring.displayBytes story zstring in
     --   printf "%s\n" text'
 
 -- BLOG #5
@@ -105,7 +106,12 @@ main = do
   -- The instruction here is a call, it takes three long constant operands,
   -- and it stores its result by pushing it onto the evaluation stack.
   -- There is no branch, and no text.
-    story <- Story.load "minizork.z3"
-    let instruction = Instruction.decode story (Instruction 0x37d9) in
-      let text' = Instruction.display instruction (Story.version story) in
-        printf "%s\n" text'        
+    -- story <- Story.load "minizork.z3"
+    -- let instruction = Instruction.decode story (Instruction 0x37d9) in
+    --   let text' = Instruction.display instruction (Story.version story) in
+    --     printf "%s\n" text'
+
+-- BLOG #10
+  story <- Story.load "minizork.z3"
+  let text = Reachability.displayReachableInstructions story (Instruction 0x37d9) in
+    printf "%s\n" text
