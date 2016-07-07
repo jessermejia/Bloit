@@ -1,10 +1,10 @@
 module Zstring where
 
-import Data.Char
-import Story
-import Text.Printf
-import Type
-import Utility
+import           Data.Char
+import           Story
+import           Text.Printf
+import           Type
+import           Utility
 
 data StringState = Alphabet Int
                  | Abbrev AbbreviationNumber

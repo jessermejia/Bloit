@@ -1,30 +1,54 @@
 module Instruction where
 
-import Data.Maybe
-import Story
-import Text.Printf
-import Type
-import Utility
-import Zstring
+import           Data.Maybe
+import           Story
+import           Text.Printf
+import           Type
+import           Utility
+import           Zstring
 
-data T = T {  opcode :: Bytecode
-           ,  address :: InstructionAddress
-           ,  length :: Int
+data T = T {  opcode   :: Bytecode
+           ,  address  :: InstructionAddress
+           ,  length   :: Int
            ,  operands :: [Operand]
-           ,  store :: Maybe VariableLocation
-           ,  branch :: Maybe (Bool, BranchAddress)
-           ,  text :: Maybe String
+           ,  store    :: Maybe VariableLocation
+           ,  branch   :: Maybe (Bool, BranchAddress)
+           ,  text     :: Maybe String
            }
 
-data OpcodeForm = LongForm 
+following :: Instruction.T -> InstructionAddress
+following instruction =
+  let Instruction addr = address instruction in
+  Instruction (addr + Instruction.length instruction)
+
+jumpAddress :: Instruction.T -> Int -> InstructionAddress
+jumpAddress instruction offset =
+  let (Instruction addr) = address instruction in
+  Instruction (addr + Instruction.length instruction + offset - 2)
+
+data OpcodeForm = LongForm
                 | ShortForm
-                | VariableForm 
+                | VariableForm
                 | ExtendedForm
 
 data OperandCount = OP0
                   | OP1
                   | OP2
                   | VAR
+
+continuesToFollowing :: Bytecode -> Bool
+continuesToFollowing opcode' =
+  case opcode' of
+    OP2_28 {- throw -} -> False
+    OP1_139 {- ret -} -> False
+    OP1_140 {- jump -} -> False
+    OP0_176 {- rtrue -} -> False
+    OP0_177 {- rFalse -} -> False
+    OP0_179 {- print_ret -} -> False
+    OP0_183 {- restart -} -> False
+    OP0_184 {- ret_popped -} -> False
+    OP0_186 {- quit -} -> False
+    _ -> True
 
 decodeVariable :: Int -> VariableLocation
 decodeVariable n | n == 0 = Stack
@@ -262,7 +286,7 @@ display instr ver =
             (Large large) -> printf "%04x " large
             (Small small) -> printf "%02x " small
             (Variable variable) -> displayVariable variable ++ " "
-        
+
         displayStore () =
           case store instr of Nothing -> ""
                               Just variable -> "->" ++ displayVariable variable
@@ -579,4 +603,3 @@ decode story (Instruction address') =
             zstringLength textAddress
           else
             0
-

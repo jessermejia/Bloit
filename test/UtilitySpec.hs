@@ -4,10 +4,10 @@ module UtilitySpec (
     -- qcTests
   ) where
 
-import Data.Bits
-import Utility
+import           Data.Bits
+import           Utility
 
-import Test.HUnit
+import           Test.HUnit
 
 -- import Test.Framework (defaultMain, testGroup, Test)
 -- import Test.Framework.Providers.QuickCheck2 (testProperty)
@@ -15,7 +15,7 @@ import Test.HUnit
 
 hunitTests :: IO Counts
 hunitTests = runTestTT (
-              TestList 
+              TestList
                 [
                  TestLabel "testAccumulateStringsWithIntArray" testAccumulateStringsWithIntArray,
                  TestLabel "testAccumulateStringsEmptyInput" testAccumulateStringsEmptyInput,

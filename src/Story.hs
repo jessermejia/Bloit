@@ -1,10 +1,10 @@
 module Story where
 
-import Data.Bits
-import ImmutableBytes
-import Text.Printf
-import Type
-import Utility
+import           Data.Bits
+import           ImmutableBytes
+import           Text.Printf
+import           Type
+import           Utility
 
 headerSize :: Int
 headerSize = 64
@@ -16,7 +16,7 @@ versionOffset :: ByteAddress
 versionOffset = ByteAddress 0
 
 data T = T { dynamicMemory :: ImmutableBytes.T
-           , staticMemory :: String
+           , staticMemory  :: String
            }
 make :: String -> String -> Story.T
 make dynamic static =
