@@ -23,8 +23,11 @@ newtype ObjectBase = ObjectBase Int deriving (Show)
 newtype ObjectTreeBase = ObjectTreeBase Int deriving (Show)
 newtype ObjectNumber = Object Int deriving (Show,Eq)
 newtype ObjectAddress = ObjectAddress Int deriving (Show)
+newtype PackedRoutineAddress = PackedRoutine Int
+newtype PackedZstringAddress = PackedZstring Int
 newtype PropertyDefaultsTable = PropertyDefaultsTable Int
 newtype PropertyHeaderAddress = PropertyHeader Int
+newtype RoutineAddress = Routine Int
 newtype WordAddress = WordAddress Int deriving (Show)
 newtype WordZstringAddress = WordZstring Int deriving (Show)
 
