@@ -112,6 +112,11 @@ main = do
     --     printf "%s\n" text'
 
 -- BLOG #10
+  -- story <- Story.load "minizork.z3"
+  -- let text = Reachability.displayReachableInstructions story (Instruction 0x37d9) in
+  --   printf "%s\n" text
+
+-- BLOG #11
   story <- Story.load "minizork.z3"
-  let text = Reachability.displayReachableInstructions story (Instruction 0x37d9) in
+  let text = Reachability.displayReachableInstructions story (Instruction 0x381d) in
     printf "%s\n" text

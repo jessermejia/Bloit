@@ -56,4 +56,4 @@ displayReachableInstructions story address' =
   where
     toString addr =
       let instr = Instruction.decode story addr in
-      Instruction.display instr (Story.version story)
+      Instruction.display instr story

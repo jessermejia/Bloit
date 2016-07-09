@@ -29,6 +29,28 @@ abbreviationsTableBase story =
   let abbreviationsTableBaseOffset = WordAddress 24 in
   AbbreviationTableBase (readWord story abbreviationsTableBaseOffset)
 
+decodeRoutinePackedAddress story (PackedRoutine packed) =
+  case version story of
+    V1 -> Routine (packed * 2)
+    V2 -> Routine (packed * 2)
+    V3 -> Routine (packed * 2)
+    V4 -> Routine (packed * 4)
+    V5 -> Routine (packed * 4)
+    V6 -> Routine (packed * 4 + routineOffset story)
+    V7 -> Routine (packed * 4 + routineOffset story)
+    V8 -> Routine (packed * 8)
+
+decodeStringPackedAddress story (PackedZstring packed) =
+  case version story of
+    V1 -> Zstring (packed * 2)
+    V2 -> Zstring (packed * 2)
+    V3 -> Zstring (packed * 2)
+    V4 -> Zstring (packed * 4)
+    V5 -> Zstring (packed * 4)
+    V6 -> Zstring (packed * 4 + stringOffset story)
+    V7 -> Zstring (packed * 4 + stringOffset story)
+    V8 -> Zstring (packed * 8)
+
 dictionaryBase :: Story.T -> DictionaryBase
 dictionaryBase story =
   let dictionaryBaseOffset = WordAddress 8 in
@@ -68,6 +90,16 @@ readWord story address =
   let high = Story.readByte story (addressOfHighByte address) in
   let low = Story.readByte story (addressOfLowByte address) in
     256 * high + low
+
+routineOffset :: Story.T -> Int
+routineOffset story =
+  let routineOffsetOffset = WordAddress 40 in
+  8 * readWord story routineOffsetOffset
+
+stringOffset :: Story.T -> Int
+stringOffset story =
+  let stringOffsetOffset = WordAddress 42 in
+  8 * readWord story stringOffsetOffset
 
 writeByte :: Story.T -> ByteAddress -> Int -> Story.T
 writeByte story address value =

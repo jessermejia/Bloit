@@ -26,6 +26,31 @@ jumpAddress instruction offset =
   let (Instruction addr) = address instruction in
   Instruction (addr + Instruction.length instruction + offset - 2)
 
+isCall :: Version -> Bytecode -> Bool
+isCall ver opcode =
+  case opcode of
+    OP1_143 {- call_1n in v5, logical not in v1-4 -} -> Story.v5_OrHigher ver
+    VAR_224 {- call / call_vs -} -> True
+    OP1_136 {- call_1s -} -> True
+    OP2_26  {- call_2n -} -> True
+    OP2_25  {- call_2s -} -> True
+    VAR_249 {- call_vn -} -> True
+    VAR_250 {- call_vn2 -} -> True
+    VAR_236 {- call_vs2 -} -> True
+    _ -> False
+
+callAddress :: Instruction.T -> Story.T -> Maybe RoutineAddress
+callAddress instr story  =
+  if isCall (Story.version story) (opcode instr) then
+    case operands instr of
+      Large packedAddress : _ ->
+        let packedAddress' = PackedRoutine packedAddress in
+        let unpackedAddress = Story.decodeRoutinePackedAddress story packedAddress' in
+        Just unpackedAddress
+      _ -> Nothing
+  else
+    Nothing
+
 data OpcodeForm = LongForm
                 | ShortForm
                 | VariableForm
@@ -268,8 +293,9 @@ opcodeName EXT_27  _ = "make_menu"
 opcodeName EXT_28  _ = "picture_table"
 opcodeName EXT_29  _ = "buffer_screen"
 
-display :: Instruction.T -> Version -> String
-display instr ver =
+display :: Instruction.T -> Story.T -> String
+display instr story =
+  let ver = Story.version story in
   let startAddr = address instr :: InstructionAddress in
   let name = opcodeName (opcode instr) ver in
   let operands' = displayOperands() in
@@ -278,7 +304,19 @@ display instr ver =
   let text' = displayText() in
     printf "%04x: %s %s%s %s %s\n" startAddr name operands' store' branch' text'
       where
-        displayOperands () = accumulateStrings toString (operands instr)
+        displayOperands () =
+          case (opcode instr, operands instr) of
+            (OP1_140, [Large offset]) ->
+              let offset' = signedWord offset in
+              let (Instruction addr) = jumpAddress instr offset' in
+                printf "%04x " addr
+            _ -> case callAddress instr story of
+                  Just (Routine addr) ->
+                    printf "%04x " addr ++ displayRemainder (tail (operands instr))
+                  _ -> displayRemainder (operands instr)
+          where
+            displayRemainder operands =
+              accumulateStrings toString operands
 
         toString :: Operand -> String
         toString operand =
