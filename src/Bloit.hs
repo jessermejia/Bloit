@@ -3,6 +3,7 @@ module Bloit where
 -- import Dictionary
 -- import ImmutableBytes
 -- import Instruction
+import           LocalStore
 -- import Object
 import           Reachability
 import           Story
@@ -117,6 +118,12 @@ main = do
   --   printf "%s\n" text
 
 -- BLOG #11
+  -- story <- Story.load "minizork.z3"
+  -- let text = Reachability.displayReachableInstructions story (Instruction 0x381d) in
+  --   printf "%s\n" text
+
+-- BLOG #12
   story <- Story.load "minizork.z3"
-  let text = Reachability.displayReachableInstructions story (Instruction 0x381d) in
-    printf "%s\n" text
+  let locals = LocalStore.createDefaultLocals story (Routine 0x3b36)
+      text = LocalStore.display locals in
+        printf "%s\n" text

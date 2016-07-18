@@ -17,10 +17,15 @@ library
   hs-source-dirs:      src
   exposed-modules:     Bloit
                      , Dictionary
+                     , EvaluationStack
+                     , Frame
+                     , FrameSet
                      , ImmutableBytes
                      , Instruction
+                     , LocalStore
                      , Object
                      , Reachability
+                     , Routine
                      , Story
                      , Type
                      , Utility
